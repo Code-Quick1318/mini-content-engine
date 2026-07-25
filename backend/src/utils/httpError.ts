@@ -19,7 +19,9 @@ export class HttpError extends Error {
     this.code = code
 
     // Maintains proper stack trace in V8 (Chrome, Node)
-    Error.captureStackTrace(this, this.constructor)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, this.constructor)
+    }
   }
 }
 
