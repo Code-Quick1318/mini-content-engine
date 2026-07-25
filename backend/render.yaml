@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: mini-content-engine-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build && npx prisma generate
+    startCommand: npx prisma migrate deploy && node dist/index.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false        # set manually in Render dashboard
+      - key: CORS_ORIGIN
+        sync: false        # set to your Vercel frontend URL
+      - key: GEMINI_API_KEY
+        sync: false        # optional — mock runs without it
