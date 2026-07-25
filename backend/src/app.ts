@@ -29,11 +29,24 @@ const app: Application = express()
 app.use(helmet())
 
 // ── 2. CORS ──────────────────────────────────────────────────────────────────
-// Only the configured origin is allowed to make cross-origin requests.
-// credentials:true enables cookies / auth headers over CORS.
+// Allow the configured origin plus any Vercel preview deployments.
+const allowedOrigins = [
+  env.CORS_ORIGIN,
+  // Allow all Vercel preview URLs for this project
+  /^https:\/\/mini-content-engine.*\.vercel\.app$/,
+]
+
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin) return callback(null, true)
+      const allowed = allowedOrigins.some((o) =>
+        typeof o === 'string' ? o === origin : o.test(origin),
+      )
+      if (allowed) return callback(null, true)
+      callback(new Error(`CORS: origin ${origin} not allowed`))
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
